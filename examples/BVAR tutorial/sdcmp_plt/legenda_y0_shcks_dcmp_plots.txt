@@ -1,0 +1,8 @@
+LEGENDA y0 SHOCK DECOMPOSITION PLOTS
+
+The figure sdcmp_y0_shcks_dcmp_1 contains the following variable:
+Interest Rate; 
+
+The figure sdcmp_y0_shcks_dcmp_2 contains the following variable:
+EBP; 
+

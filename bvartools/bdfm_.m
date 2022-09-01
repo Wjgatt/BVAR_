@@ -56,7 +56,8 @@ end
 %********************************************************
 %
 ilags               = 0;            % lag strucutre of the idiosyncratic component
-K                   = 1000;        % number of draws from the posterior
+% K                   = 1000;         % number of draws from the posterior
+K                   = options.ndraws;         % number of draws from the posterior
 hor                 = 24;           % horizon for the IRF
 fhor                = 12;           % horizon for the forecasts
 noconstant          = 1;            % when 0, includes a constatn in the factor VAR
@@ -552,7 +553,7 @@ yhatfut_with_shocks       = NaN(fhor, ny, K);   % forecast without the factor-sh
 %* Gibbs Sampler 
 %**************************************************
 waitbar_yes = 0;
-if K > 99
+if K > 9
     waitbar_yes = 1;
     wb = waitbar(0, 'Generating draws from the Posterior Distribution');
 end
