@@ -23,6 +23,8 @@ function [frcst_no_shock,frcst_with_shocks]=forecasts(forecast_data,Phi,Sigma,fh
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 ny = size(Sigma,1);
+nunits = size(forecast_data.initval,3);
+
 if nargin < 6
     shock_given = 0;
 else
@@ -35,32 +37,35 @@ end
 Sigma_lower_chol = chol(Sigma)';
 
 % preallocating memory
-frcst_no_shock     = nan(fhor,ny);
-frcst_with_shocks  = nan(fhor,ny);
+frcst_no_shock     = nan(fhor,ny,nunits);
+frcst_with_shocks  = nan(fhor,ny,nunits);
 
-lags_data = forecast_data.initval;
-if skip_ == 0 
+for uu  = 1 : nunits   
+    % no shocks
+    lags_data = forecast_data.initval(:,:,uu);
+    if skip_ == 0
+        for t = 1 : fhor
+            X = [ reshape(flip(lags_data, 1)', 1, ny*lags) forecast_data.xdata(t, :) ];
+            y = X * Phi;
+            lags_data(1:end-1,:) = lags_data(2:end, :);
+            lags_data(end,:) = y;
+            frcst_no_shock(t, :, uu) = y;
+        end
+    end
+
+    % With shocks
+    lags_data = forecast_data.initval(:,:,uu);
     for t = 1 : fhor
         X = [ reshape(flip(lags_data, 1)', 1, ny*lags) forecast_data.xdata(t, :) ];
-        y = X * Phi;
+        if shock_given == 1
+            shock  = EPS(t,:);
+        else
+            shock = (Sigma_lower_chol * randn(ny, 1))';
+        end
+        y = X * Phi + shock;
         lags_data(1:end-1,:) = lags_data(2:end, :);
         lags_data(end,:) = y;
-        frcst_no_shock(t, :) = y;
+        frcst_with_shocks(t, :, uu) = y;
     end
-end
 
-% With shocks
-lags_data = forecast_data.initval;
-for t = 1 : fhor
-    X = [ reshape(flip(lags_data, 1)', 1, ny*lags) forecast_data.xdata(t, :) ];    
-    if shock_given == 1
-        shock  = EPS(t,:);
-    else
-        shock = (Sigma_lower_chol * randn(ny, 1))';
-    end
-    y = X * Phi + shock;
-    lags_data(1:end-1,:) = lags_data(2:end, :);
-    lags_data(end,:) = y;
-    frcst_with_shocks(t, :) = y;
 end
-
